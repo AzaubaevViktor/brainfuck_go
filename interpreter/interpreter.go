@@ -10,6 +10,9 @@ type BFInterpreter struct {
 	pc     ProgramAddress
 	prg    Program
 	mp	   MemoryAddress
+
+	Ticks     uint64
+	TicksFact uint64
 }
 
 func NewBFInterpreter(program Program) *BFInterpreter {
@@ -41,9 +44,12 @@ func (I *BFInterpreter) step() {
 	}
 
 	I.pc += 1
+	// stats
+	I.Ticks += abs(op.count)
+	I.TicksFact += 1
 }
 
-func (I BFInterpreter) Run() {
+func (I *BFInterpreter) Run() {
 	for I.pc < ProgramAddress(len(I.prg)) {
 		if Debug {
 			fmt.Println(I.prg[I.pc])
@@ -53,7 +59,6 @@ func (I BFInterpreter) Run() {
 		if Debug {
 			fmt.Println(I)
 		}
-
 	}
 }
 

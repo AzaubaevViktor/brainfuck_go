@@ -4,6 +4,7 @@ import (
 	//"fmt"
 	"io/ioutil"
 	i "./interpreter"
+	"fmt"
 )
 
 func check(e error) {
@@ -25,4 +26,8 @@ func main() {
 	interpreter := i.NewBFInterpreter(ops)
 	i.Debug = false
 	interpreter.Run()
+	fmt.Println("\n==================== STATS ================")
+	fmt.Printf("Ticks:         %v\nTicks in fact: %d\n",
+		interpreter.Ticks,
+		interpreter.TicksFact)
 }

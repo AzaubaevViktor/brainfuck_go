@@ -12,4 +12,11 @@ func (A *stack) Pop() ProgramAddress {
 	return last
 }
 
+func abs(i int) uint64 {
+	if i < 0 {
+		i = -i
+	}
+	return uint64(i)
+}
+
 var Debug bool

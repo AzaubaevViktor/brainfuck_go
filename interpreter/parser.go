@@ -78,21 +78,21 @@ func Parse(data []byte) Program {
 		case '[':
 			prg.push(curOp)
 			cycleStack.Push(prg.pc())
-			prg.push(Operation{opcode: CYCLE_OP})
+			prg.push(Operation{opcode: CYCLE_OP, count: 1})
 			curOp = Operation{opcode:NOP}
 		case ']':
 			prg.push(curOp)
 			pos := cycleStack.Pop()
 			prg[pos].addr = prg.pc()
-			prg.push(Operation{opcode: CYCLE_CLOSE, addr: pos})
+			prg.push(Operation{opcode: CYCLE_CLOSE, addr: pos, count: 1})
 			curOp = Operation{opcode:NOP}
 		case '.':
 			prg.push(curOp)
-			prg.push(Operation{opcode: PRINT})
+			prg.push(Operation{opcode: PRINT, count: 1})
 			curOp = Operation{opcode:NOP}
 		case ',':
 			prg.push(curOp)
-			prg.push(Operation{opcode: READ})
+			prg.push(Operation{opcode: READ, count: 1})
 			curOp = Operation{opcode:NOP}
 		}
 	}
