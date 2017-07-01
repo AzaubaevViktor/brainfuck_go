@@ -20,4 +20,9 @@ func main() {
 
 	fmt.Println("Operations:")
 	fmt.Println(ops)
+
+	fmt.Println("Run:")
+	interpreter := i.NewBFInterpreter(ops)
+
+	interpreter.Run()
 }

@@ -9,3 +9,7 @@ const (
 	READ = 7
 )
 
+type MemoryCell uint8
+type Program []Operation
+type ProgramAddress int
+type MemoryAddress int
