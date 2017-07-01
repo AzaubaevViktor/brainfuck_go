@@ -2,7 +2,7 @@ package interpreter
 
 import (
 	"fmt"
-	//"time"
+	"time"
 )
 
 type BFInterpreter struct {
@@ -45,10 +45,14 @@ func (I *BFInterpreter) step() {
 
 func (I BFInterpreter) Run() {
 	for I.pc < ProgramAddress(len(I.prg)) {
-		//fmt.Println(I.prg[I.pc])
-		//time.Sleep(100 * time.Millisecond)
+		if Debug {
+			fmt.Println(I.prg[I.pc])
+			time.Sleep(100 * time.Millisecond)
+		}
 		I.step()
-		//fmt.Println(I)
+		if Debug {
+			fmt.Println(I)
+		}
 
 	}
 }

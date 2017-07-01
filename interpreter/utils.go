@@ -11,3 +11,5 @@ func (A *stack) Pop() ProgramAddress {
 	last , *A = (*A)[len(*A) - 1], (*A)[:len(*A) - 1]
 	return last
 }
+
+var Debug bool

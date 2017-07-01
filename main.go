@@ -23,6 +23,6 @@ func main() {
 
 	//fmt.Println("Run:")
 	interpreter := i.NewBFInterpreter(ops)
-
+	i.Debug = false
 	interpreter.Run()
 }

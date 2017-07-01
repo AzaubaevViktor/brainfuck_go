@@ -35,38 +35,69 @@ func (O Operation) String() string {
 	return fmt.Sprintf("{%s %d *%d}", opcode, O.count, O.addr)
 }
 
-func Parse(data []byte) (ops []Operation) {
+func Parse(data []byte) Program {
 	var cycleStack stack
+	var prg Program
 
-	position := ProgramAddress(0)
+	curOp := Operation{}
 
 	for _, ch := range data {
 		switch ch {
 		case '+':
-			ops = append(ops, Operation{opcode: PLUS, count: 1})
+			switch curOp.opcode {
+			case PLUS:
+				curOp.count += 1
+			default:
+				prg.push(curOp)
+				curOp = Operation{opcode:PLUS, count: 1}
+			}
 		case '-':
-			ops = append(ops, Operation{opcode: PLUS, count: -1})
+			switch curOp.opcode {
+			case PLUS:
+				curOp.count -= 1
+			default:
+				prg.push(curOp)
+				curOp = Operation{opcode:PLUS, count: -1}
+			}
 		case '>':
-			ops = append(ops, Operation{opcode: MOVE, count: 1})
+			switch curOp.opcode {
+			case MOVE:
+				curOp.count += 1
+			default:
+				prg.push(curOp)
+				curOp = Operation{opcode:MOVE, count: 1}
+			}
 		case '<':
-			ops = append(ops, Operation{opcode: MOVE, count: -1})
+			switch curOp.opcode {
+			case MOVE:
+				curOp.count -= 1
+			default:
+				prg.push(curOp)
+				curOp = Operation{opcode:MOVE, count: -1}
+			}
 		case '[':
-			ops = append(ops, Operation{opcode: CYCLE_OP})
-			cycleStack.Push(position)
+			prg.push(curOp)
+			cycleStack.Push(prg.pc())
+			prg.push(Operation{opcode: CYCLE_OP})
+			curOp = Operation{opcode:NOP}
 		case ']':
+			prg.push(curOp)
 			pos := cycleStack.Pop()
-			ops = append(ops, Operation{opcode: CYCLE_CLOSE, addr: pos})
-			ops[pos].addr = position
+			prg[pos].addr = prg.pc()
+			prg.push(Operation{opcode: CYCLE_CLOSE, addr: pos})
+			curOp = Operation{opcode:NOP}
 		case '.':
-			ops = append(ops, Operation{opcode: PRINT})
+			prg.push(curOp)
+			prg.push(Operation{opcode: PRINT})
+			curOp = Operation{opcode:NOP}
 		case ',':
-			ops = append(ops, Operation{opcode: READ})
-		default:
-			position -= 1
+			prg.push(curOp)
+			prg.push(Operation{opcode: READ})
+			curOp = Operation{opcode:NOP}
 		}
-
-		position += 1
 	}
 
-	return
+	prg.push(curOp)
+
+	return prg
 }
