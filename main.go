@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	//"fmt"
 	"io/ioutil"
 	i "./interpreter"
 )
@@ -13,15 +13,15 @@ func check(e error) {
 }
 
 func main() {
-	data, err := ioutil.ReadFile("bf/hello.bf")
+	data, err := ioutil.ReadFile("bf/mandelbrot.bf")
 	check(err)
 
 	ops := i.Parse(data)
 
-	fmt.Println("Operations:")
-	fmt.Println(ops)
+	//fmt.Println("Operations:")
+	//fmt.Println(ops)
 
-	fmt.Println("Run:")
+	//fmt.Println("Run:")
 	interpreter := i.NewBFInterpreter(ops)
 
 	interpreter.Run()

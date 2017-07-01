@@ -38,8 +38,9 @@ func (O Operation) String() string {
 func Parse(data []byte) (ops []Operation) {
 	var cycleStack stack
 
-	for _position, ch := range data {
-		position := ProgramAddress(_position)
+	position := ProgramAddress(0)
+
+	for _, ch := range data {
 		switch ch {
 		case '+':
 			ops = append(ops, Operation{opcode: PLUS, count: 1})
@@ -60,7 +61,11 @@ func Parse(data []byte) (ops []Operation) {
 			ops = append(ops, Operation{opcode: PRINT})
 		case ',':
 			ops = append(ops, Operation{opcode: READ})
+		default:
+			position -= 1
 		}
+
+		position += 1
 	}
 
 	return
