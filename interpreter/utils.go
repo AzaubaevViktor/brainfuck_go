@@ -19,4 +19,22 @@ func abs(i int) uint64 {
 	return uint64(i)
 }
 
-var Debug bool
+type Iterator func() (byte, bool)
+
+func ByteIterator(D []byte) (Iterator, bool) {
+	dataLen := len(D)
+	id := 0
+	return func() (byte, bool) {
+		id++
+		if id < dataLen {
+			return D[id-1], true
+		} else {
+			return 0, false
+		}
+	}, id < dataLen
+}
+
+var Debug struct{
+	Parser bool
+	Interpreter bool
+}

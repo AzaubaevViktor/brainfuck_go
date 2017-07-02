@@ -2,102 +2,53 @@ package interpreter
 
 import "fmt"
 
-type Operation struct{
-	opcode int
-	count  int
-	addr   ProgramAddress
-}
+const (
+	_format_debug = "CH:%c\nPROG:%v\nMOD:%v\n===============\n"
+)
 
-func (O Operation) String() string {
-	opcode := "NOP"
-	switch O.opcode {
-	case PLUS:
-		if O.count > 0 {
-			opcode = "+"
-		} else {
-			opcode = "-"
-		}
-	case MOVE:
-		if O.count > 0 {
-			opcode = ">"
-		} else {
-			opcode = "<"
-		}
-	case CYCLE_OP:
-		opcode = "["
-	case CYCLE_CLOSE:
-		opcode = "]"
-	case PRINT:
-		opcode = "."
-	case READ:
-		opcode = ","
-	}
-	return fmt.Sprintf("{%s %d *%d}", opcode, O.count, O.addr)
-}
+func NewParse(it Iterator) Program {
+	prg := Program{}
+	modifier := NewModifier()
 
-func Parse(data []byte) Program {
-	var cycleStack stack
-	var prg Program
-
-	curOp := Operation{}
-
-	for _, ch := range data {
+	for ch, hasNext := it(); hasNext && ch != ']'; ch, hasNext = it() {
 		switch ch {
 		case '+':
-			switch curOp.opcode {
-			case PLUS:
-				curOp.count += 1
-			default:
-				prg.push(curOp)
-				curOp = Operation{opcode:PLUS, count: 1}
-			}
+			modifier.add(1)
 		case '-':
-			switch curOp.opcode {
-			case PLUS:
-				curOp.count -= 1
-			default:
-				prg.push(curOp)
-				curOp = Operation{opcode:PLUS, count: -1}
-			}
+			modifier.add(-1)
 		case '>':
-			switch curOp.opcode {
-			case MOVE:
-				curOp.count += 1
-			default:
-				prg.push(curOp)
-				curOp = Operation{opcode:MOVE, count: 1}
-			}
+			modifier.move(1)
 		case '<':
-			switch curOp.opcode {
-			case MOVE:
-				curOp.count -= 1
-			default:
-				prg.push(curOp)
-				curOp = Operation{opcode:MOVE, count: -1}
-			}
-		case '[':
-			prg.push(curOp)
-			cycleStack.Push(prg.pc())
-			prg.push(Operation{opcode: CYCLE_OP, count: 1})
-			curOp = Operation{opcode:NOP}
-		case ']':
-			prg.push(curOp)
-			pos := cycleStack.Pop()
-			prg[pos].addr = prg.pc()
-			prg.push(Operation{opcode: CYCLE_CLOSE, addr: pos, count: 1})
-			curOp = Operation{opcode:NOP}
+			modifier.move(-1)
 		case '.':
-			prg.push(curOp)
-			prg.push(Operation{opcode: PRINT, count: 1})
-			curOp = Operation{opcode:NOP}
+			prg.push(modifier)
+			modifier = NewModifier()
+			prg.push(Operation(OP_PRINT))
 		case ',':
-			prg.push(curOp)
-			prg.push(Operation{opcode: READ, count: 1})
-			curOp = Operation{opcode:NOP}
+			prg.push(modifier)
+			modifier = NewModifier()
+			prg.push(Operation(OP_READ))
+		case '[':
+			prg.push(modifier)
+			modifier = NewModifier()
+			cycle := Cycle{}
+			if Debug.Parser {
+				fmt.Printf(_format_debug, ch, prg, modifier)
+			}
+			cycle.prg = NewParse(it)
+			prg.push(cycle)
+		}
+
+		if Debug.Parser {
+			fmt.Printf(_format_debug, ch, prg, modifier)
 		}
 	}
 
-	prg.push(curOp)
+	prg.push(modifier)
+
+	if Debug.Parser {
+		fmt.Printf(_format_debug, ']', prg, modifier)
+	}
 
 	return prg
 }
