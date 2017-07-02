@@ -14,24 +14,26 @@ func check(e error) {
 }
 
 func main() {
-	data, err := ioutil.ReadFile("bf/hello.bf")
+	data, err := ioutil.ReadFile("bf/mandelbrot.bf")
 	check(err)
 
 	it, _ := i.ByteIterator(data)
 
-	i.Debug.Parser = true
+	i.Debug.Parser = false
 
-	prg := i.NewParse(it)
+	prg := i.Parse(it)
 
-	fmt.Println("Program:")
-	fmt.Println(prg)
+	if i.Debug.Parser {
+		fmt.Println("Program:")
+		fmt.Println(prg)
+	}
 
-	//fmt.Println("Run:")
-	//interpreter := i.NewBFInterpreter(ops)
-	//i.Debug = false
-	//interpreter.Run()
-	//fmt.Println("\n==================== STATS ================")
-	//fmt.Printf("Ticks:         %v\nTicks in fact: %d\n",
-	//	interpreter.Ticks,
-	//	interpreter.TicksFact)
+	fmt.Println("======================  Run  ================")
+	interpreter := i.NewBFInterpreter()
+	i.Debug.Interpreter = false
+	interpreter.Run(prg)
+	fmt.Println("\n==================== STATS ================")
+	fmt.Printf("Ticks:         %v\nTicks in fact: %d\n",
+		interpreter.Ticks,
+		interpreter.TicksFact)
 }

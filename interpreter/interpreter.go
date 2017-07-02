@@ -6,63 +6,64 @@ import (
 
 type BFInterpreter struct {
 	memory []MemoryCell
-	pc     ProgramAddress
-	prg    Program
 	mp	   MemoryAddress
+	depth  int
 
 	Ticks     uint64
 	TicksFact uint64
 }
 
-func NewBFInterpreter(program Program) *BFInterpreter {
-	return &BFInterpreter{memory: make([]MemoryCell, 30000), pc: 0, prg: program}
+func NewBFInterpreter() *BFInterpreter {
+	return &BFInterpreter{memory: make([]MemoryCell, 10000)}
 }
 
 func (I BFInterpreter) cur() MemoryCell {
 	return I.memory[I.mp]
 }
-//
-//func (I *BFInterpreter) step() {
-//	op := I.prg[I.pc]
-//
-//	switch op.opcode {
-//	case PLUS:
-//		I.memory[I.mp] += MemoryCell(op.count)
-//	case MOVE:
-//		I.mp += MemoryAddress(op.count)
-//	case CYCLE_OP:
-//		if 0 == I.cur() {
-//			I.pc = op.addr - 1 // Because below +=1
-//		}
-//	case CYCLE_CLOSE:
-//		if 0 != I.cur() {
-//			I.pc = op.addr // and +1 below
-//		}
-//	case PRINT:
-//		fmt.Printf("%c", I.cur())
-//	}
-//
-//	I.pc += 1
-//	// stats
-//	I.Ticks += abs(op.count)
-//	I.TicksFact += 1
-//}
-//
-//func (I *BFInterpreter) Run() {
-//	for I.pc < ProgramAddress(len(I.prg)) {
-//		if Debug {
-//			fmt.Println(I.prg[I.pc])
-//			time.Sleep(100 * time.Millisecond)
-//		}
-//		I.step()
-//		if Debug {
-//			fmt.Println(I)
-//		}
-//	}
-//}
+
+func (I BFInterpreter) debug() bool {
+	return Debug.Interpreter
+}
+
+func (I *BFInterpreter) Run(prg Program) {
+	for _, ex := range prg {
+		if I.debug() {
+			fmt.Printf(getIndent(I.depth) + "%v:\n", ex)
+		}
+		switch ex.(type) {
+		case Modifier:
+			m := ex.(Modifier)
+			for addr, d := range m.mem {
+				I.memory[I.mp+addr] += d
+			}
+			I.mp += m.dMP
+		case Operation:
+			switch ex.(Operation) {
+			case OP_PRINT:
+				fmt.Printf("%c", I.memory[I.mp])
+			}
+		case Cycle:
+			cycle := ex.(Cycle)
+			if I.debug() {
+				fmt.Println(getIndent(I.depth) + "Go into cycle!")
+			}
+			I.depth += 1
+			for 0 != I.cur() {
+				I.Run(cycle.prg)
+			}
+			I.depth -= 1
+			if I.debug() {
+				fmt.Println(getIndent(I.depth) + "Go out of cycle!")
+			}
+		}
+		if I.debug() {
+			fmt.Printf(getIndent(I.depth) + "%v\n==================\n", I)
+		}
+	}
+}
 
 func (I BFInterpreter) String() string {
-	return fmt.Sprintf("%v PC: %d; MP: %d", I.memory, I.pc, I.mp)
+	return fmt.Sprintf("%v MP: %d", I.memory, I.mp)
 }
 
 

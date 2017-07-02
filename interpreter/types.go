@@ -11,6 +11,8 @@ type MemoryCell uint8
 type ProgramAddress int
 type MemoryAddress int
 
+type MemoryMap map[MemoryAddress]MemoryCell
+
 
 type Executable interface {
 	toS(int) string
@@ -40,6 +42,10 @@ func (O Operation) toS(indent int) string {
 	return s
 }
 
+func (O Operation) String() string {
+	return O.toS(0)
+}
+
 
 // =====================
 type Program []Executable
@@ -65,22 +71,22 @@ func (P Program) String() string {
 
 // ===============
 type Modifier struct {
-	mem map[int]uint8
-	dMP int
+	mem MemoryMap
+	dMP MemoryAddress
 	active bool
 }
 
 func NewModifier() Modifier {
-	return Modifier{mem: map[int]uint8{}}
+	return Modifier{mem: MemoryMap{}}
 }
 
 func (M *Modifier) add(val int) {
-	M.mem[M.dMP] += uint8(val)
+	M.mem[M.dMP] += MemoryCell(val)
 	M.active = true
 }
 
 func (M *Modifier) move(val int) {
-	M.dMP += val
+	M.dMP += MemoryAddress(val)
 	M.active = true
 }
 

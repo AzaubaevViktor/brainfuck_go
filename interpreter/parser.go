@@ -6,7 +6,7 @@ const (
 	_format_debug = "CH:%c\nPROG:%v\nMOD:%v\n===============\n"
 )
 
-func NewParse(it Iterator) Program {
+func Parse(it Iterator) Program {
 	prg := Program{}
 	modifier := NewModifier()
 
@@ -35,7 +35,7 @@ func NewParse(it Iterator) Program {
 			if Debug.Parser {
 				fmt.Printf(_format_debug, ch, prg, modifier)
 			}
-			cycle.prg = NewParse(it)
+			cycle.prg = Parse(it)
 			prg.push(cycle)
 		}
 
